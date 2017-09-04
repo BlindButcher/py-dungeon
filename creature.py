@@ -1,6 +1,8 @@
 from enum import Enum, auto
 from random import randrange
 
+from flag import HeroFlagGenerator, Flag
+
 
 class AttributeType(Enum):
     POWER = auto()
@@ -28,6 +30,7 @@ class CreatureEvents(Enum):
     NONE = auto()
     WOUND_HEALED = auto()
     HERO_TAKEN = auto()
+    HERO_DEAD = auto()
 
 
 class DealWoundResult:
@@ -100,6 +103,14 @@ class Hero(Creature):
         self.carried_treasure = []
         self.toughness = attribute_map[AttributeType.TOUGHNESS]
         self.carried_hero = None
+        self.character_flags = HeroFlagGenerator.generate()
+
+    def help_tag(self):
+        if Flag.MEAN in self.character_flags:
+            return Flag.MEAN
+        if Flag.HELPFUL in self.character_flags:
+            return Flag.HELPFUL
+        return Flag.NEUTRAL
 
     def obtain_treasure(self, treasure):
         self.carried_treasure.append(treasure)
@@ -126,7 +137,7 @@ class Hero(Creature):
         return DealWoundResult(self, wounds, wounds_negated, prev_status)
 
     def __str__(self):
-        return super().__str__() + f',Toughness={self.toughness}'
+        return super().__str__() + f',Toughness={self.toughness}, Help features:{self.help_tag()}'
 
     def take_disabled_hero(self, disabled_hero):
         assert disabled_hero.disabled(), f'{disabled_hero.name} is not disabled.'

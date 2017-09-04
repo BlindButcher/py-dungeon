@@ -2,8 +2,9 @@ import abc
 from enum import Enum, auto
 from random import randrange
 
-from creature import MonsterGenerator, CreatureEvents
+from creature import MonsterGenerator, CreatureEvents, CreatureStatus
 from fight import Fight
+from flag import HeroDecisionService, Help
 
 
 class Location:
@@ -21,7 +22,7 @@ class Location:
 
 
 class LocationComplex(Location):
-    HERO_RESCUE_LOC_CHANCE = 100
+    HERO_RESCUE_LOC_CHANCE = 25
 
     def __init__(self, name, holder, loc_generator):
         super().__init__(name, holder)
@@ -40,10 +41,11 @@ class LocationComplex(Location):
 
     def explorer(self):
         return_heroes = []
-        dead_heroes = []
         new_assignment = {}
         for l, h in self.hero_assignment.items():
+
             l.visit(h)
+
             if h.disabled():
                 self.message_holder.append(f'{h.name} disabled and waiting for help')
 
@@ -97,10 +99,29 @@ class HeroRoom(Location):
         self.disabled_hero = disabled_hero
 
     def visit(self, hero):
-        self.message_holder.append(f'{hero.name} sees ${self.disabled_hero.name} and tries to help him.')
-        hero.take_disabled_hero(self.disabled_hero)
-        self.disabled_hero = None
-        return hero, CreatureEvents.HERO_TAKEN
+
+        decision = HeroDecisionService.disabled_hero(hero)
+
+        if decision == Help.RESCUE:
+            self.message_holder.append(f'{hero.name} sees ${self.disabled_hero.name} and tries to help him.')
+            hero.take_disabled_hero(self.disabled_hero)
+            self.disabled_hero = None
+            return hero, CreatureEvents.HERO_TAKEN
+        elif decision == Help.NOTHING:
+            self.message_holder.append(f'{hero.name} sees ${self.disabled_hero.name} and ignores him.')
+            return hero, CreatureEvents.NONE
+        elif decision == Help.STEAL:
+            self.message_holder.append(f'{hero.name} sees ${self.disabled_hero.name} and steals all his treasures.')
+            to_steal = self.disabled_hero.carried_treasures
+            hero.carried_treasure.extend(to_steal)
+            self.disabled_hero.carried_treasures = []
+            return hero, CreatureEvents.NONE
+        elif decision == Help.KILL:
+            self.message_holder.append(f'{hero.name} sees ${self.disabled_hero.name} and kills him.')
+            self.disabled_hero.status = CreatureStatus.DEAD
+            return hero, CreatureEvents.HERO_DEAD
+
+        assert False, f'Should not get here with decision:{decision}'
 
 
 class MonsterDan(Location):
