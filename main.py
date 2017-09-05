@@ -9,11 +9,9 @@ class Main:
         self.loc_complex = loc_complex
 
     def handle_heal(self):
-        wounded = filter(lambda _: _.wounded() or _.carried_hero is not None, self.hero_pool)
+        wounded = list(filter(lambda _: _.wounded() or _.carried_hero is not None, self.hero_pool))
         for _ in wounded:
             self.temple.visit(_)
-
-        for _ in wounded:
             self.hero_pool.remove(_)
 
     def next_tick(self):
@@ -26,6 +24,7 @@ class Main:
         self.hero_pool = []
 
         self.hero_pool.extend(self.temple.explorer()['return_heroes'])
+
         all_heroes = self.loc_complex.explorer()
 
         self.hero_pool.extend(all_heroes['return_heroes'])

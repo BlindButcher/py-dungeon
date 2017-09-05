@@ -1,3 +1,4 @@
+import uuid
 from enum import Enum, auto
 from random import randrange
 
@@ -59,8 +60,8 @@ class DealWoundResult:
 
 
 class Creature:
-    def __init__(self, creature_id, name, power):
-        self.creature_id = creature_id
+    def __init__(self, name, power):
+        self.creature_id = uuid.uuid1()
         self.name = name
         self.power = power
         self.status = CreatureStatus.ALIVE
@@ -98,8 +99,8 @@ class Creature:
 
 
 class Hero(Creature):
-    def __init__(self, creature_id, name, attribute_map):
-        super().__init__(creature_id, name, attribute_map[AttributeType.POWER])
+    def __init__(self, name, attribute_map):
+        super().__init__(name, attribute_map[AttributeType.POWER])
         self.carried_treasure = []
         self.toughness = attribute_map[AttributeType.TOUGHNESS]
         self.carried_hero = None
@@ -148,4 +149,4 @@ class Hero(Creature):
 
 class MonsterGenerator:
     def generate(self):
-        return Creature("monster", "my_monster", 2)
+        return Creature("my_monster", 2)

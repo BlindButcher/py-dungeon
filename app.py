@@ -49,9 +49,9 @@ class Application(tk.Frame):
             self.message_box.insert('1.0', str(self.cur_turn) + ': ' + m)
 
 
-dd_hero = Hero('hero', 'DD', {AttributeType.POWER: 4, AttributeType.TOUGHNESS: 1})
-tank_hero = Hero('hero', 'Tank', {AttributeType.POWER: 2, AttributeType.TOUGHNESS: 4})
-weak_hero = Hero('hero', 'Weak', {AttributeType.POWER: 2, AttributeType.TOUGHNESS: 2})
+dd_hero = Hero('DD', {AttributeType.POWER: 4, AttributeType.TOUGHNESS: 1})
+tank_hero = Hero('Tank', {AttributeType.POWER: 2, AttributeType.TOUGHNESS: 4})
+weak_hero = Hero('Weak', {AttributeType.POWER: 2, AttributeType.TOUGHNESS: 2})
 
 text_message_holder = MessageHolder()
 

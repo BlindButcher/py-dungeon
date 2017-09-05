@@ -5,6 +5,7 @@ from random import randrange
 from creature import MonsterGenerator, CreatureEvents, CreatureStatus
 from fight import Fight
 from flag import HeroDecisionService, Help
+from hero_assign import HeroAssignment
 
 
 class Location:
@@ -28,21 +29,27 @@ class LocationComplex(Location):
         super().__init__(name, holder)
         self.loc_generator = loc_generator
         self.unique_locations = []
-        self.hero_assignment = {}
+        self.hero_assignment = set()
 
     def visit(self, hero):
         new_loc = self.loc_generator
 
-        self.hero_assignment[new_loc()] = hero  # at least for now, one hero per location
-        pass
+        new_assign = HeroAssignment(hero, new_loc())
+
+        assert new_assign not in self.hero_assignment, 'Hero is already in the list'
+
+        self.hero_assignment.add(new_assign)
 
     def visiting_heroes(self):
-        return self.hero_assignment.values()
+        return list(map(lambda _: _.hero, self.hero_assignment))
 
     def explorer(self):
         return_heroes = []
-        new_assignment = {}
-        for l, h in self.hero_assignment.items():
+        new_assignment = set()
+
+        for a in self.hero_assignment:
+            l = a.assign_loc
+            h = a.hero
 
             l.visit(h)
 
@@ -53,7 +60,7 @@ class LocationComplex(Location):
 
             elif l.next_loc is not None:
                 self.try_hero_rescue(l, h)
-                new_assignment[l.next_loc] = h
+                new_assignment.add(HeroAssignment(h, l.next_loc))
             else:
                 self.message_holder.append(f'{h.name} has cleaned the dungeon and is back to pool')
                 return_heroes.append(h)
